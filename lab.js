@@ -6,7 +6,6 @@
   const recorder = window.LabRecorder;
   const panel = byId('panel');
   const dock = byId('dock');
-  const aura = byId('aura');
   const sheet = panel.querySelector('.sheet');
   const themeMedia = matchMedia('(prefers-color-scheme: dark)');
   const motionMedia = matchMedia('(prefers-reduced-motion: reduce)');
@@ -16,22 +15,6 @@
   let pendingMoment = null;
   let openingButton = null;
   let noticeTimer = 0;
-
-  function refreshAura() {
-    const svg = aura.querySelector('svg');
-    const {width, height} = svg.getBoundingClientRect();
-    if (width < 3 || height < 3) return;
-    const edge = 2, left = edge, top = edge, right = width - edge, bottom = height - edge;
-    const radius = Math.min(44, width / 8, height / 8);
-    const upper = root.dataset.corners === 'square' ? 0 : radius;
-    const d = [
-      'M', left + upper, top, 'H', right - upper, 'Q', right, top, right, top + upper,
-      'V', bottom - radius, 'Q', right, bottom, right - radius, bottom,
-      'H', left + radius, 'Q', left, bottom, left, bottom - radius,
-      'V', top + upper, 'Q', left, top, left + upper, top, 'Z'
-    ].join(' ');
-    for (const path of svg.querySelectorAll('path')) path.setAttribute('d', d);
-  }
 
   function syncOptions() {
     for (const key of ['theme', 'corners', 'surface']) {
@@ -195,14 +178,6 @@
     byId('offline-state').parentNode.dataset.state = state;
   }
 
-  // The SVG stroke runs from the upper left around the perimeter clockwise.
-  // A CSS animation clock also accounts for pauses and background suspension.
-  window.LabAura = {phase() {
-    const path = aura.querySelector('.sweep path');
-    const progress = path?.getAnimations?.()[0]?.effect?.getComputedTiming()?.progress;
-    return Number.isFinite(progress) ? Math.round(progress * 10000) / 10000 : null;
-  }};
-
   const feedback = document.createElement('p');
   feedback.id = 'device-feedback';
   feedback.setAttribute('role', 'status');
@@ -212,9 +187,6 @@
   syncOptions();
   updateMode();
   updateOffline(window.LabOffline);
-  refreshAura();
-  if (typeof ResizeObserver === 'function') new ResizeObserver(refreshAura).observe(aura);
-  else window.addEventListener('resize', refreshAura, {passive:true});
   themeMedia.addEventListener('change', () => { if (!hasChosenTheme) useTheme(themeMedia.matches ? 'dark' : 'light'); });
   motionMedia.addEventListener('change', () => {
     if (!hasChosenMotion) root.dataset.motion = motionMedia.matches ? 'paused' : 'playing';
@@ -267,7 +239,6 @@
   for (const [key, values] of [['corners', ['rounded', 'square']], ['surface', ['notes', 'solid']]]) {
     for (const value of values) byId(key + '-' + value).addEventListener('click', () => {
       root.dataset[key] = value;
-      refreshAura();
       syncOptions();
       recorder.capture(key + '-' + value);
     });

@@ -25,16 +25,13 @@ button:focus-visible, summary:focus-visible, select:focus-visible, input:focus-v
 }
 button:disabled { opacity:.55; cursor: default; }
 #aura { position:fixed; inset:0; z-index:2; overflow:hidden; pointer-events:none; }
-#aura svg { display:block; }
-#aura .halo { opacity:.8; }
-#aura .outline { opacity:.96; }
-.sweep path { animation: travel 5.6s linear infinite; }
-@keyframes travel { to { stroke-dashoffset: -100; } }
-.sweep-shadow { opacity:.9; }
-html[data-motion="paused"] .sweep path { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) { html:not([data-motion="playing"]) .sweep path { animation-play-state:paused; } }
+#aura canvas {
+  display:block; width:100%; height:100%;
+  -webkit-mask: var(--edge-mask, none) center / 100% 100% no-repeat;
+  mask: var(--edge-mask, none) center / 100% 100% no-repeat;
+}
 html[data-surface="solid"] #aura { border-top: max(24px, env(safe-area-inset-top, 0px)) solid var(--solid); }
-html[data-surface="solid"] #aura svg { visibility:hidden; }
+html[data-surface="solid"] #aura canvas { visibility:hidden; }
 #workspace { max-width: 660px; margin: 0 auto;
   padding: calc(32px + env(safe-area-inset-top, 0px)) max(28px, env(safe-area-inset-right, 0px)) calc(145px + env(safe-area-inset-bottom, 0px)) max(28px, env(safe-area-inset-left, 0px));
 }

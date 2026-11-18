@@ -6,7 +6,7 @@ const profilePrefix = 'ios-pwa-lab:' + scopeURL.pathname + ':';
 const cacheName = profilePrefix + self.LAB_BUILD;
 const entry = new URL('index.html', scopeURL).href;
 const urls = new Set([
-  'index.html', 'manifest.webmanifest', '../lab.css', '../lab.js',
+  'index.html', 'manifest.webmanifest', '../lab.css', '../lab.js', '../glow.js',
   '../recorder.js', '../register.js',
   ...[180, 192, 512].map(size => '../assets/' + profile + '-' + size + '.png')
 ].map(path => new URL(path, scopeURL).href));
