@@ -56,9 +56,15 @@
     const strokes = layers.map(([weight, , opacity], i) =>
       '<use href="#rim" xlink:href="#rim" stroke-width="' + weight + '" opacity="' + opacity + '" filter="url(#b' + i + ')"/>'
     ).join('');
+    // Give the top a little more depth under the translucent status bar.
+    // Fade into the existing reflection inside the same curved glass silhouette.
+    const topGradient = '<linearGradient id="top-light" x2="0" y2="1">' +
+      '<stop stop-color="white" stop-opacity=".7"/><stop offset=".4" stop-color="white" stop-opacity=".50"/>' +
+      '<stop offset=".72" stop-color="white" stop-opacity=".15"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient>';
+    const topLight = '<rect width="' + width + '" height="19" fill="url(#top-light)" stroke="none"/>';
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ' + width + ' ' + height + '">' +
-      '<defs><path id="rim" d="' + outline + '"/><clipPath id="glass"><path d="' + outline + '"/></clipPath>' + filters + '</defs>' +
-      '<g clip-path="url(#glass)" stroke="white" stroke-linejoin="round" fill="none">' + strokes + '</g></svg>';
+      '<defs><path id="rim" d="' + outline + '"/><clipPath id="glass"><path d="' + outline + '"/></clipPath>' + filters + topGradient + '</defs>' +
+      '<g clip-path="url(#glass)" stroke="white" stroke-linejoin="round" fill="none">' + strokes + topLight + '</g></svg>';
     canvas.style.setProperty('--edge-mask', 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")');
   }
 
