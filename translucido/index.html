@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR" data-profile="translucido" data-corners="rounded" data-motion="playing" data-surface="notes">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PWA Translúcido">
+  <meta name="theme-color" content="#f8f8fa">
+  <meta name="app-version" content="2026.11.17.1">
+  <title>PWA Translúcido · iOS PWA Lab</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../assets/translucido-180.png">
+  <link rel="stylesheet" href="../lab.css">
+  <script src="../recorder.js" defer></script>
+  <script src="../lab.js" defer></script>
+  <script src="../register.js" defer></script>
+</head>
+<body>
+  <div id="aura" aria-hidden="true">
+    <svg width="100%" height="100%" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="aura-ink" x1="0%" x2="100%" y1="100%" y2="0%">
+          <stop stop-color="#66bea5"/><stop offset=".25" stop-color="#70bde5"/><stop offset=".51" stop-color="#b194ec"/><stop offset=".77" stop-color="#ffb58f"/><stop offset="1" stop-color="#ede485"/>
+        </linearGradient>
+        <filter id="aura-glow" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="10"/></filter>
+      </defs>
+      <g fill="none" stroke="url(#aura-ink)">
+        <path class="halo" stroke-width="22" filter="url(#aura-glow)"/><path class="outline" stroke-width="5"/>
+      </g>
+      <g class="sweep" fill="none" stroke-linecap="round">
+        <path class="sweep-shadow" pathLength="100" stroke="#58439c" stroke-width="7" stroke-dasharray="3.4 96.6"/>
+        <path pathLength="100" stroke="#fff" stroke-width="3" stroke-dasharray="3.1 96.9"/>
+      </g>
+    </svg>
+  </div>
+
+  <main id="workspace">
+    <header class="page-head">
+      <span class="profile"><span class="profile-dot" aria-hidden="true"></span>PWA Translúcido</span>
+      <span id="launch-mode" class="launch-mode"></span>
+    </header>
+    <p id="storage-warning" role="status" hidden>Registros apenas na memória. Exporte em Relatórios antes de fechar.</p>
+    <h1>Teste de borda</h1>
+    <p class="lead">Observe a luz passar pelo topo. Toque em <strong>Marcar momento</strong> para registrar o que vê.</p>
+    <section class="note-area" aria-labelledby="note-label">
+      <h2 id="note-label">Anotação de teste</h2>
+      <div id="editor" contenteditable="true" role="textbox" aria-label="Anotação de teste" aria-multiline="true" data-placeholder="Toque para abrir o teclado…" autocapitalize="sentences" spellcheck="false"></div>
+    </section>
+    <section class="scroll-end" aria-label="Fim da área de teste"><span aria-hidden="true">↑</span><p>Fim da área de rolagem</p><button type="button" id="return-top">Voltar ao topo</button></section>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <nav id="dock" aria-label="Controles do teste">
+    <button id="tools" type="button" aria-controls="panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6m5 0h7M3 17h10m5 0h3"/><circle cx="11.5" cy="7" r="2.5"/><circle cx="15.5" cy="17" r="2.5"/></svg><span>Ferramentas</span></button>
+    <button id="mark" type="button" aria-controls="panel"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg><span>Marcar momento</span></button>
+    <button id="reports" type="button" aria-controls="panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6zM9 11h6m-6 4h6"/></svg><span>Relatórios</span></button>
+  </nav>
+  <div id="panel" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="panel-title">
+      <div class="sheet-head"><h2 id="panel-title"></h2><button type="button" id="panel-close" aria-label="Fechar painel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <div class="sheet-content">
+        <section id="view-mark" hidden>
+          <p class="hint">O que você viu no instante do toque?</p>
+          <div class="observations">
+            <button type="button" data-observation="Linha atrás da hora"><i class="swatch moving"></i>Linha atrás da hora</button>
+            <button type="button" data-observation="Só cor ou desfoque"><i class="swatch blur"></i>Só cor ou desfoque</button>
+            <button type="button" data-observation="Borda abaixo da barra"><i class="swatch below"></i>Borda abaixo da barra</button>
+            <button type="button" data-observation="Outro momento do teste"><i class="swatch other"></i>Outro momento do teste</button>
+          </div>
+        </section>
+        <section id="view-tools" hidden>
+          <fieldset><legend>Tema</legend><div class="segments">
+            <button type="button" id="theme-light">Claro</button><button type="button" id="theme-dark">Escuro</button>
+          </div></fieldset>
+          <fieldset><legend>Cantos superiores</legend><div class="segments">
+            <button type="button" id="corners-rounded">Curvos</button><button type="button" id="corners-square">Retos · 90°</button>
+          </div></fieldset>
+          <fieldset><legend>Superfície de teste</legend><div class="segments">
+            <button type="button" id="surface-notes">Anotação</button><button type="button" id="surface-solid">Faixa sólida</button>
+          </div></fieldset>
+          <button class="secondary full" id="motion" type="button">Pausar a luz</button>
+          <details id="device-settings"><summary>Identificar aparelho</summary>
+            <label for="device-model">Modelo</label><input id="device-model" maxlength="64" placeholder="iPhone 15 Pro Max" autocomplete="off">
+            <label for="device-os">Versão do iOS</label><input id="device-os" maxlength="32" placeholder="27.2" autocomplete="off">
+            <button class="secondary full" id="save-device" type="button">Salvar identificação</button>
+          </details>
+        </section>
+        <section id="view-reports" hidden>
+          <label for="session-select">Sessão</label><select id="session-select"></select>
+          <p class="hint" id="session-info"></p>
+          <button class="primary full" id="share" type="button">Compartilhar JSON</button>
+          <div class="export-options"><button class="secondary" id="download" type="button">Baixar JSON</button><button class="secondary" id="copy" type="button">Copiar JSON</button></div>
+          <div id="manual-export" hidden><label for="manual-json">Selecione e copie o relatório</label><textarea id="manual-json" readonly rows="4"></textarea></div>
+          <p id="report-status" role="status" aria-live="polite"></p>
+          <div class="offline-status"><i></i><span id="offline-state">Preparando uso offline…</span></div>
+        </section>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
