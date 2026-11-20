@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR" data-profile="padrao" data-page="anotacoes" data-surface="notes" data-motion="paused" data-corners="rounded">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PWA Padrão">
+  <meta name="theme-color" content="#f8f8fa">
+  <meta name="app-version" content="2026.11.20.1">
+  <title>Anotações · PWA Padrão</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../assets/padrao-180.png">
+  <link rel="stylesheet" href="../lab.css">
+  <link rel="stylesheet" href="../percurso.css">
+  <script src="../glow.js" defer></script>
+  <script src="../percurso.js" defer></script>
+  <script src="../tela-percurso.js" defer></script>
+  <script src="../register.js" defer></script>
+</head>
+<body>
+  <div id="aura" aria-hidden="true"><canvas width="192" height="192"></canvas></div>
+  <main id="workspace">
+    <header class="trial-heading">
+      <span>PWA Padrão</span>
+      <span data-trip-step>Anotações</span>
+    </header>
+    <p class="mode-warning" data-mode-warning hidden>Para conferir a barra do iPhone, abra o PWA Padrão pelo ícone na Tela de Início.</p>
+    <section class="reading-sample">
+      <h1 id="route-page-title">Anotações</h1>
+      <span class="reference">Gênesis 1:1</span>
+      <p class="verse">“No princípio, Deus criou os céus e a terra.”</p>
+    </section>
+    <div id="trial-controls"></div>
+
+    <noscript>Ative o JavaScript para registrar suas observações.</noscript>
+  </main>
+  <nav id="dock" aria-label="Navegação do teste">
+    <a class="home-link" href="./index.html">Laboratório</a>
+    <a class="route-action" data-trip-next href="./estudo.html">Voltar ao estudo<span aria-hidden="true">→</span></a>
+    <a class="route-action" data-trip-results-link href="#resultado" hidden>Ver resultado<span aria-hidden="true">↑</span></a>
+  </nav>
+</body>
+</html>

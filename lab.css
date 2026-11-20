@@ -43,6 +43,12 @@ h1 { margin: 46px 0 12px; font-size: clamp(2rem, 7.6vw, 2.8rem); line-height:1.1
 #storage-warning { padding:8px 12px; border:1px solid var(--stroke); border-left:3px solid var(--accent); border-radius:8px; color:var(--ink); font-size:.88rem; }
 .lead { max-width:31em; margin:0; color:var(--soft); line-height:1.55; }
 .lead strong { color:var(--ink); font-weight:600; }
+.trip-entry {
+  display:inline-flex; align-items:center; gap:.7em; min-height:44px; margin-top:12px;
+  padding:6px 14px; border-radius:12px; background:var(--wash); color:var(--accent);
+  font-weight:650; text-decoration:none;
+}
+.trip-entry:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
 .note-area { margin:38px 0 0; border-top:1px solid var(--stroke); }
 .note-area h2 { margin:19px 0 8px; color:var(--soft); font-size:.81rem; font-weight:620; }
 #editor { font-size:1.12rem; line-height:1.6; min-height:9em; padding:3px 0; outline:none; white-space:pre-wrap; overflow-wrap:anywhere; caret-color:var(--accent); }

@@ -98,6 +98,76 @@ def select_profile(page, base, profile):
     page.wait_for_function('window.LabRecorder && window.LabRecorder.listSessions().length > 0')
 
 
+def exercise_trip(page, url, profile, build):
+    # Read the served HTML before its scripts run. The iOS host can consult
+    # this head before JS and CSS create any in-page chrome.
+    for name, mode in [('estudo', None), ('anotacoes', 'black-translucent')]:
+        head = page.evaluate('''async url => {
+          const response = await fetch(url);
+          const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+          return {page:doc.documentElement.dataset.page, profile:doc.documentElement.dataset.profile,
+            mode:doc.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.content ?? null,
+            manifest:new URL(doc.querySelector('link[rel="manifest"]').getAttribute('href'), url).href,
+            fit:doc.querySelector('meta[name="viewport"]').content,
+            theme:doc.querySelector('meta[name="theme-color"]').content};
+        }''', url + name + '.html')
+        assert head['page'] == name and head['profile'] == profile and head['mode'] == mode, head
+        assert head['manifest'] == url + 'manifest.webmanifest' and 'viewport-fit=cover' in head['fit'], head
+        if name == 'estudo':
+            control_color = head['theme']
+        else:
+            assert head['theme'] == control_color
+
+    def assert_step(name, phase):
+        page.wait_for_function('phase => window.TrialRecorder?.getState().phase === phase', arg=phase)
+        assert urlsplit(page.url).path == urlsplit(url + name + '.html').path
+        assert page.evaluate('navigator.serviceWorker.controller?.scriptURL') == url + 'sw.js'
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
+
+    page.locator('a[href*="estudo.html?iniciar=1"]').first.click()
+    assert_step('estudo', 'studyBefore')
+    trip_id = page.evaluate('TrialRecorder.getReport().tripId')
+    page.locator('[data-trip-observation="separada"]').click()
+    page.locator('[data-trip-next]').click()
+    assert_step('anotacoes', 'notes')
+    assert page.locator('#aura canvas').is_visible()
+    page.locator('[data-trip-observation="aura-no-relogio"]').click()
+    page.reload()
+    assert_step('anotacoes', 'notes')
+    assert page.evaluate('TrialRecorder.getReport().visits.at(-1).observation.value') == 'aura-no-relogio'
+    if profile == 'padrao':
+        page.locator('[data-trip-next]').click()
+    else:
+        page.go_back()
+    assert_step('estudo', 'studyAfter')
+    page.locator('[data-trip-observation="separada"]').click()
+    page.locator('[data-trip-share]').click()
+    page.wait_for_function('id => window.qaShared?.tripId === id', arg=trip_id)
+    with page.expect_download() as download:
+        page.locator('[data-trip-download]').click()
+    report = json.loads(Path(download.value.path()).read_text())
+    assert report['type'] == 'ios-pwa-lab-percurso' and report['tripId'] == trip_id
+    assert report['profile'] == profile and report['build'] == build
+    visits = report['visits']
+    assert [(v['phase'], v['observation']['value']) for v in visits] == [
+        ('studyBefore', 'separada'), ('notes', 'aura-no-relogio'), ('studyAfter', 'separada')], visits
+    assert [v['arrival']['statusBarStyle'] for v in visits] == [None, 'black-translucent', None]
+    assert all(v['observation']['view']['innerHeight'] > 0 for v in visits)
+    assert visits[1]['observation']['view']['auraPhase'] is not None
+    if profile == 'padrao':
+        assert all(v['arrival']['standalone'] for v in visits)
+    assert page.evaluate('qaShared.visits.map(v=>v.id)') == [v['id'] for v in visits]
+    assert RESERVED not in json.dumps(report) and SECRET not in json.dumps(report)
+    assert page.evaluate('TrialRecorder.getState().completed')
+    save_screenshot(page, f'{profile}-trip-complete')
+    page.locator('[data-trip-new]').click()
+    assert_step('estudo', 'studyBefore')
+    fresh = page.evaluate('TrialRecorder.getReport()')
+    assert fresh['tripId'] != trip_id and len(fresh['visits']) == 1
+    assert fresh['visits'][0]['observation'] is None
+    return trip_id
+
+
 def check(engine, executable, base, server):
     origin = urlsplit(base).netloc
     with TemporaryDirectory(prefix='ios-pwa-lab-qa-') as work:
@@ -109,6 +179,9 @@ def check(engine, executable, base, server):
         # The native share sheet belongs to iOS. Capture the File handed to it
         # so CI exercises the same UI handler without opening a system dialog.
         context.add_init_script("""(() => {
+          if (location.pathname.includes('/padrao/')) {
+            Object.defineProperty(navigator, 'standalone', {value: true});
+          }
           Object.defineProperty(navigator, 'canShare', {value: data => data.files?.length === 1});
           Object.defineProperty(navigator, 'share', {value: async data => {
             window.qaShared = JSON.parse(await data.files[0].text());
@@ -126,6 +199,7 @@ def check(engine, executable, base, server):
           await cache.put('./sentinel-response', new Response('kept'));
         }""", RESERVED)
         identities = set()
+        trip_ids = set()
         geometries = {}
         for profile in PROFILES:
             page.goto(base)
@@ -172,6 +246,16 @@ def check(engine, executable, base, server):
                   return Promise.all(srcs.map(async src => [src, (await fetch(src)).status]));
                 }""")
                 assert all(code == 200 for _, code in assets), assets
+                if trip_ids:
+                    other_id = next(iter(trip_ids))
+                    page.goto(url + 'anotacoes.html?percurso=' + other_id)
+                    page.wait_for_function('window.TrialRecorder?.getState().phase === "untracked"')
+                    isolated = page.evaluate('TrialRecorder.getReport()')
+                    assert isolated['profile'] == profile and all(not v['observation'] for v in isolated['visits'])
+                    page.goto(url)
+                trip_id = exercise_trip(page, url, profile, build)
+                assert trip_id not in trip_ids
+                trip_ids.add(trip_id)
             finally:
                 server.unavailable = False
                 if engine.name == 'chromium':

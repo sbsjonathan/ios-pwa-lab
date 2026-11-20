@@ -6,8 +6,9 @@ const profilePrefix = 'ios-pwa-lab:' + scopeURL.pathname + ':';
 const cacheName = profilePrefix + self.LAB_BUILD;
 const entry = new URL('index.html', scopeURL).href;
 const urls = new Set([
-  'index.html', 'manifest.webmanifest', '../lab.css', '../lab.js', '../glow.js',
-  '../recorder.js', '../register.js',
+  'index.html', 'estudo.html', 'anotacoes.html', 'manifest.webmanifest',
+  '../lab.css', '../lab.js', '../glow.js', '../recorder.js', '../register.js',
+  '../percurso.css', '../percurso.js', '../tela-percurso.js',
   ...[180, 192, 512].map(size => '../assets/' + profile + '-' + size + '.png')
 ].map(path => new URL(path, scopeURL).href));
 
@@ -15,6 +16,7 @@ self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(cacheName);
     await cache.addAll([...urls].map(url => new Request(url, {cache: 'reload'})));
+    await self.skipWaiting();
   })());
 });
 self.addEventListener('activate', event => {
